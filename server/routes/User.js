@@ -16,7 +16,7 @@ const {
 
 const { auth } = require("../middlewares/auth")
 
-const { createCourse } = require("../controllers/Course")
+//const { createCourse } = require("../controllers/Course")
 
 // Routes for Login, Signup, and Authentication
 
