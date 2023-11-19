@@ -5,12 +5,13 @@ const studentConnection = mongoose.createConnection("mongodb+srv://prakarmisheen
 const instructorConnection = mongoose.createConnection("mongodb+srv://prakarmisheena:5rIp5UykvaqtaR81@cluster0.otxbose.mongodb.net/instructors");
 const testConnection = mongoose.createConnection("mongodb+srv://prakarmisheena:5rIp5UykvaqtaR81@cluster0.otxbose.mongodb.net/tests");
 const otpConnection = mongoose.createConnection("mongodb+srv://prakarmisheena:5rIp5UykvaqtaR81@cluster0.otxbose.mongodb.net/otp")
-
+const quizConnection = mongoose.createConnection("mongodb+srv://prakarmisheena:5rIp5UykvaqtaR81@cluster0.otxbose.mongodb.net/quiz")
 module.exports = {
   studentConnection,
   instructorConnection,
   testConnection,
   otpConnection,
+  quizConnection,
 };
 
 

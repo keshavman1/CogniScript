@@ -3,6 +3,7 @@ import { updateCompletedLectures } from "../../slices/viewCourseSlice"
 // import { setLoading } from "../../slices/profileSlice";
 import { apiConnector } from "../apiconnector"
 import { courseEndpoints } from "../apis"
+import axios from "axios"
 const {
   COURSE_DETAILS_API,
   COURSE_CATEGORIES_API,
@@ -82,27 +83,42 @@ export const fetchCourseCategories = async () => {
 
 // add the course details
 export const addCourseDetails = async (data, token) => {
-  console.log("courseDetailsAPI hai yeh : ", data)
-  let result = null
-  const toastId = toast.loading("Loading...")
+  let result = null;
+  const toastId = toast.loading("Loading...");
+  console.log("FILE", data.courseImage)
+  const file = data.courseImage
   try {
-    const response = await apiConnector("POST", CREATE_COURSE_API, data, {
-      "Content-Type": "multipart/form-data",
-      Authorisation: `Bearer ${token}`,
-    })
-    console.log("CREATE COURSE API RESPONSE............", response)
-    if (!response?.data?.success) {
-      throw new Error("Could Not Add Course Details")
+    const formData = {
+      file,
+      user: 'Instructor',
     }
-    toast.success("Course Details Added Successfully")
-    result = response?.data?.data
+
+    console.log("FORMDATA", formData);
+
+    const response = await axios.post(CREATE_COURSE_API, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`, // Include any necessary headers
+      },
+    });
+
+    console.log("CREATE COURSE API RESPONSE............", response);
+
+    if (!response?.data?.success) {
+      throw new Error("Could Not Add Course Details");
+    }
+
+    toast.success("Course Details Added Successfully");
+    result = response?.data?.data;
   } catch (error) {
-    console.log("CREATE COURSE API ERROR............", error)
-    toast.error(error.message)
+    console.log("CREATE COURSE API ERROR............", error);
+    toast.error(error.message);
   }
-  toast.dismiss(toastId)
-  return result
-}
+
+  toast.dismiss(toastId);
+  return result;
+};
+
 
 // edit the course details
 export const editCourseDetails = async (data, token) => {

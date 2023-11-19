@@ -1,9 +1,23 @@
 
 const User = require("../models/Student");
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
-
+const Quiz = require("../models/Quiz")
+const upload = require('../middlewares/multer');
 // Function to create a new course
+// server/controllers/Course.js
+
+const fs = require('fs');
+const path = require('path');
+
 exports.createCourse = async (req, res) => {
+	console.log("CHEKGKGIG : ",req.file)
+    res.status(200).json({
+      success: true,
+      message: 'Course Created Successfully',
+    });
+  
+};
+
 	// // console.log(req.body)
 	// // res.status(200).json({
 	// // 	success: true,
@@ -128,7 +142,7 @@ exports.createCourse = async (req, res) => {
 	// 		error: error.message,
 	// 	});
 	// }
-};
+//};
 
 exports.getAllCourses = async (req, res) => {
 	try {
