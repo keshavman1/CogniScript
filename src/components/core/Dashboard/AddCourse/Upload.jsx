@@ -32,20 +32,30 @@ export default function Upload({
   }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    accept: [
-      "application/msword",
-    ],
+    accept: {
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'image/*': [],
+      'video/*': []
+    },
     onDrop,
   });
   
-  
 
   const previewFile = (file) => {
-    // console.log(file)
-    const reader = new FileReader()
-    reader.readAsDataURL(file)
-    reader.onloadend = () => {
-      setPreviewSource(reader.result)
+    if (file.type.startsWith("image/")) {
+      // Handle image file preview
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onloadend = () => {
+        setPreviewSource(reader.result)
+      }
+    } else if (file.type.startsWith("video/")) {
+      // Handle video file preview
+      setPreviewSource(URL.createObjectURL(file))
+    } else {
+      // For non-image and non-video files (like Word documents), show the file name
+      setPreviewSource(file.name)
     }
   }
 
@@ -71,14 +81,17 @@ export default function Upload({
       >
         {previewSource ? (
           <div className="flex w-full flex-col p-6">
-            {!video ? (
+            {typeof previewSource === "string" && previewSource.startsWith("data:image/") ? (
               <img
                 src={previewSource}
                 alt="Preview"
                 className="h-full w-full rounded-md object-cover"
               />
-            ) : (
+            ) : previewSource.startsWith("blob:") ? (
               <Player aspectRatio="16:9" playsInline src={previewSource} />
+            ) : (
+              // Display file name for non-image and non-video files
+              <span className="text-richblack-400">{previewSource}</span>
             )}
             {!viewData && (
               <button
@@ -104,13 +117,11 @@ export default function Upload({
               <FiUploadCloud className="text-2xl text-yellow-50" />
             </div>
             <p className="mt-2 max-w-[200px] text-center text-sm text-richblack-200">
-              Drag and drop an {!video ? "image" : "video"}, or click to{" "}
-              <span className="font-semibold text-yellow-50">Browse</span> a
-              file
+              Drag and drop a file, or click to <span className="font-semibold text-yellow-50">Browse</span>
             </p>
-            <ul className="mt-10 flex list-disc justify-between space-x-12 text-center  text-xs text-richblack-200">
-              <li>Aspect ratio 16:9</li>
-              <li>Recommended size 1024x576</li>
+            <ul className="mt-10 flex list-disc justify-between space-x-12 text-center text-xs text-richblack-200">
+              <li>Accepts images, videos, and Word documents</li>
+              <li>Recommended size for images and videos: 1024x576</li>
             </ul>
           </div>
         )}
