@@ -22,7 +22,7 @@ dotenv.config();
 const PORT = process.env.PORT || 4000;
 const multer  = require('multer')
 const path = require('path');
-
+const { spawn } = require('child_process');
 
 dotenv.config();
 
@@ -51,12 +51,33 @@ app.post('/api/v1/upload', upload.array('files'), async (req, res) => {
   console.log("post yeh ho rha hai : ", req.body)
   try {
     const filePromises = req.files.map((file) => {
-      const content = fs.readFileSync(file.path);
+    /*  const content = fs.readFileSync(file.path);
+      console.log(file.path)
       const newQuiz = Quiz.create({
         filename: file.originalname,
         path: file.path,
         size: file.size,
         content: content
+      }); */
+      let filePath = path.join(__dirname, 'uploads');
+      filePath = path.join(filePath, file.originalname);
+      console.log("DIRNAME", filePath)
+
+      const pythonProcess = spawn('python', ['./indexx.py', filePath]);
+
+      // Listen for data from the Python script (if needed)
+      pythonProcess.stdout.on('data', (data) => {
+        console.log(`Python script output: ${data}`);
+      });
+
+      // Listen for errors (if any)
+      pythonProcess.stderr.on('data', (data) => {
+        console.error(`Error in Python script: ${data}`);
+      });
+
+      // Listen for the child process to close
+      pythonProcess.on('close', (code) => {
+        console.log(`Python script exited with code ${code}`);
       });
     });
 
