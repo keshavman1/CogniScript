@@ -4,7 +4,6 @@ const Student = require("../models/Student");
 
 //auth
 exports.auth = async (req, res, next) => {
-    
     try{
         //extract token
         const token = req.cookies.token 

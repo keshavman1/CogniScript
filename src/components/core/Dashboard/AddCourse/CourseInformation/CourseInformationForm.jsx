@@ -43,7 +43,7 @@ export default function CourseInformationForm() {
 
   const onSubmit = async (data) => {
 
-    if (editCourse) {
+  /*  if (editCourse) {
       if (isFormUpdated()) {
         const currentValues = getValues()
         const formData = new FormData()
@@ -69,10 +69,7 @@ export default function CourseInformationForm() {
 
       return
     }
-
-    const formData = new FormData()
-    formData.append("courseName", data.courseTitle)
-
+  */
     setLoading(true)
     const result = await addCourseDetails(data, token)
     if (result) {

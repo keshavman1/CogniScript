@@ -21,6 +21,7 @@ const {
   GET_FULL_COURSE_DETAILS_AUTHENTICATED,
   CREATE_RATING_API,
   LECTURE_COMPLETION_API,
+  File_upload,
 } = courseEndpoints
 
 export const getAllCourses = async () => {
@@ -84,40 +85,47 @@ export const fetchCourseCategories = async () => {
 // add the course details
 export const addCourseDetails = async (data, token) => {
   let result = null;
-  const toastId = toast.loading("Loading...");
-  console.log("FILE", data.courseImage)
-  const file = data.courseImage
+  const toastId = toast.loading("Loading.");
+
   try {
-    const formData = {
-      file,
-      user: 'Instructor',
-    }
+    const formData = new FormData();
+    formData.append('user', 'instructor');
+    formData.append('files', data.courseImage);
+    formData.append('courseTitle', data.courseTitle);
 
-    console.log("FORMDATA", formData);
+    console.log('DATA HERE:', data);
+    console.log('at CourseDetailsAPI:', formData);
 
-    const response = await axios.post(CREATE_COURSE_API, formData, {
+    const response = await fetch(File_upload, {
+      method: 'POST',
+      body: formData,
       headers: {
-        'Content-Type': 'multipart/form-data',
-        Authorization: `Bearer ${token}`, // Include any necessary headers
+        Authorization: `Bearer ${token}`,
       },
     });
 
-    console.log("CREATE COURSE API RESPONSE............", response);
+    if (!response.ok) {
+      throw new Error(`Failed to upload course details. Status: ${response.status}`);
+    }
 
-    if (!response?.data?.success) {
+    const responseData = await response.json();
+
+    if (!responseData.success) {
       throw new Error("Could Not Add Course Details");
     }
 
     toast.success("Course Details Added Successfully");
-    result = response?.data?.data;
+    result = responseData.data;
   } catch (error) {
-    console.log("CREATE COURSE API ERROR............", error);
+    console.error("CREATE COURSE API ERROR:", error);
     toast.error(error.message);
   }
 
   toast.dismiss(toastId);
   return result;
 };
+
+
 
 
 // edit the course details
