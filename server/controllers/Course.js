@@ -2,7 +2,6 @@
 const User = require("../models/Student");
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
 const Quiz = require("../models/Quiz")
-const upload = require('../middlewares/multer');
 // Function to create a new course
 // server/controllers/Course.js
 

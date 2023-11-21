@@ -2,12 +2,11 @@ const mongoose = require('mongoose');
 const { quizConnection } = require('../config/database');
 
 const quizSchema = new mongoose.Schema({
-    name: String,
-    file: {
-        data: Buffer,       // Buffer of the file
-        contentType: String,
-        filename: String,
-    },
+    filename: String,
+    path: String,
+    size: Number,
+    content: Buffer,  
+    uploadDate: { type: Date, default: Date.now }
 });
 
 const Quiz = quizConnection.model("Quiz", quizSchema);
