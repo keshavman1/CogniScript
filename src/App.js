@@ -25,6 +25,7 @@ import MyCourses from "./components/core/Dashboard/MyCourses";
 import EditCourse from "./components/core/Dashboard/EditCourse";
 import Catalog from "./pages/Catalog";
 import CourseDetails from "./pages/CourseDetails";
+import Quizes from "./components/core/Dashboard/Quizes";
 
 function App() {
 
@@ -105,6 +106,7 @@ function App() {
       <Route path="dashboard/instructor" element={<MyProfile />} />
       <Route path="dashboard/my-profile" element={<MyProfile />} />
       <Route path="dashboard/Settings" element={<Settings />} />
+      <Route path="dashboard/quizes" element={<Quizes />} />
       
       {
         user?.accountType === ACCOUNT_TYPE.STUDENT && (

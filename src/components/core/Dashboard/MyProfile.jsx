@@ -52,7 +52,7 @@ export default function MyProfile() {
             <IconBtn
               text="Upcoming Quizes"
               onclick={() => {
-                navigate("/dashboard/settings")
+                navigate("/dashboard/quizes")
               }}
             >
               <RiEditBoxLine />
