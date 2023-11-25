@@ -1,10 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit"
-
+import { enableMapSet } from "immer";
+enableMapSet();
 const initialState = {
   step: 1,
   course: null,
   editCourse: false,
   paymentLoading: false,
+  codes: [{code : 'temp', data : `0`}],
 }
 
 const courseSlice = createSlice({

@@ -2,9 +2,10 @@ import docx
 import re
 import pymongo
 import sys
+import uuid
 
 doc_path = sys.argv[1]
-
+doc_teacher = sys.argv[2]
 doc = docx.Document(doc_path)
 print(doc)
 
@@ -29,13 +30,12 @@ client = pymongo.MongoClient("mongodb+srv://prakarmisheena:5rIp5UykvaqtaR81@clus
 database = client["quiz"]
 collection = database["quizzes"]
 
-uid = 1
+uid = str(uuid.uuid4())
 test_date = None
-teacher_id = None
 students_id = []
 model_id = None
 
-document = {"uid": uid, "test_date" : test_date, "teacher_id" : teacher_id, "questions": questions, "answers": answers, "Students_present" : students_id, "model_id" : model_id}
+document = {"uid": uid, "test_date" : test_date, "teacher_id" : doc_teacher, "questions": questions, "answers": answers, "Students_present" : students_id, "start_quiz" : 0}
 
 result = collection.insert_one(document)
 print(f"Inserted document ID: {result.inserted_id}")
