@@ -48,22 +48,14 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 app.post('/api/v1/upload', upload.array('files'), async (req, res) => {
-  console.log("post yeh ho rha hai : ", req.body)
   try {
     const filePromises = req.files.map((file) => {
-    /*  const content = fs.readFileSync(file.path);
-      console.log(file.path)
-      const newQuiz = Quiz.create({
-        filename: file.originalname,
-        path: file.path,
-        size: file.size,
-        content: content
-      }); */
       let filePath = path.join(__dirname, 'uploads');
       filePath = path.join(filePath, file.originalname);
-      console.log("DIRNAME", filePath)
+      let courseTeacher = req.body.Teacher_id;
+      console.log("TEACHER_id", courseTeacher)
 
-      const pythonProcess = spawn('python', ['./indexx.py', filePath]);
+      const pythonProcess = spawn('python', ['./indexx.py', filePath, courseTeacher]);
 
       // Listen for data from the Python script (if needed)
       pythonProcess.stdout.on('data', (data) => {

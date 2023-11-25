@@ -4,13 +4,12 @@ import { toast } from "react-hot-toast"
 import { HiOutlineCurrencyRupee } from "react-icons/hi"
 import { MdNavigateNext } from "react-icons/md"
 import { useDispatch, useSelector } from "react-redux"
-
 import {
   addCourseDetails,
   editCourseDetails,
   fetchCourseCategories,
 } from "../../../../../services/operations/courseDetailsAPI"
-import { setCourse, setStep } from "../../../../../slices/courseSlice"
+import { courseCodes, setCourse, setStep } from "../../../../../slices/courseSlice"
 import { COURSE_STATUS } from "../../../../../utils/constants"
 import IconBtn from "../../../../common/IconBtn"
 import Upload from "../Upload"
@@ -29,6 +28,8 @@ export default function CourseInformationForm() {
   const dispatch = useDispatch()
   const { token } = useSelector((state) => state.auth)
   const { course, editCourse } = useSelector((state) => state.course)
+  const { user } = useSelector((state) => state.profile)
+  let Teacher_id = user._id;
   const [loading, setLoading] = useState(false)
   const isFormUpdated = () => {
     const currentValues = getValues()
@@ -42,7 +43,6 @@ export default function CourseInformationForm() {
   }
 
   const onSubmit = async (data) => {
-
   /*  if (editCourse) {
       if (isFormUpdated()) {
         const currentValues = getValues()
@@ -70,13 +70,18 @@ export default function CourseInformationForm() {
       return
     }
   */
-    setLoading(true)
-    const result = await addCourseDetails(data, token)
-    if (result) {
-    //  dispatch(setStep(2))
-      dispatch(setCourse(result))
-    }
-    setLoading(false)
+    setLoading(true);
+  const formData = new FormData();
+  formData.append('courseImage', data.courseImage);
+  formData.append('Teacher_id', Teacher_id);
+
+  const result = await addCourseDetails(formData, token);
+
+  if (result) {
+    dispatch(setCourse(result));
+  }
+
+  setLoading(false);
   }
 
   return (
@@ -87,11 +92,11 @@ export default function CourseInformationForm() {
       {/* Course Title */}
       <div className="flex flex-col space-y-2">
         <label className="text-sm text-richblack-5" htmlFor="courseTitle">
-          Subject <sup className="text-pink-200">*</sup>
+          Subject Code <sup className="text-pink-200">*</sup>
         </label>
         <input
           id="courseTitle"
-          placeholder="Enter Course Title"
+          placeholder="Enter Course Code"
           {...register("courseTitle", { required: true })}
           className="form-style w-full"
         />

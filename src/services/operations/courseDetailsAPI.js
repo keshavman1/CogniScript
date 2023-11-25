@@ -4,6 +4,7 @@ import { updateCompletedLectures } from "../../slices/viewCourseSlice"
 import { apiConnector } from "../apiconnector"
 import { courseEndpoints } from "../apis"
 import axios from "axios"
+import { useSelector } from "react-redux"
 const {
   COURSE_DETAILS_API,
   COURSE_CATEGORIES_API,
@@ -84,17 +85,14 @@ export const fetchCourseCategories = async () => {
 
 // add the course details
 export const addCourseDetails = async (data, token) => {
+  
   let result = null;
   const toastId = toast.loading("Loading.");
-
   try {
     const formData = new FormData();
     formData.append('user', 'instructor');
-    formData.append('files', data.courseImage);
-    formData.append('courseTitle', data.courseTitle);
-
-    console.log('DATA HERE:', data);
-    console.log('at CourseDetailsAPI:', formData);
+    formData.append('files', data.get('courseImage'));
+    formData.append('Teacher_id', data.get('Teacher_id'))
 
     const response = await fetch(File_upload, {
       method: 'POST',

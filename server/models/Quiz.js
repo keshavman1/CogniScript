@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+/*const mongoose = require('mongoose');
 const { quizConnection } = require('../config/database');
 
 const quizSchema = new mongoose.Schema({
@@ -11,3 +11,4 @@ const quizSchema = new mongoose.Schema({
 
 const Quiz = quizConnection.model("Quiz", quizSchema);
 module.exports = Quiz;
+*/
