@@ -44,15 +44,16 @@ body{
 .card{
     width:400px;
     height:max-content;
-    margin:1rem;
+    margin: 1rem;
     padding:1rem;
     display: flex;
     flex-direction: column;
     border-radius: 10px;
     align-items: center;
+    justify-content: center;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
     overflow-x: hidden;
-    background-color: white;
+    background-color: #D3D3D3;
 }
 
 .image{
