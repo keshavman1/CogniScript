@@ -120,8 +120,8 @@ export default function Upload({
               Drag and drop a file, or click to <span className="font-semibold text-yellow-50">Browse</span>
             </p>
             <ul className="mt-10 flex list-disc justify-between space-x-12 text-center text-xs text-richblack-200">
-              <li>Accepts images, videos, and Word documents</li>
-              <li>Recommended size for images and videos: 1024x576</li>
+              <li>Accepts Word documents</li>
+              
             </ul>
           </div>
         )}

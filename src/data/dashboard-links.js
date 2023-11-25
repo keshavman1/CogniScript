@@ -14,6 +14,7 @@ export const sidebarLinks = [
     type: ACCOUNT_TYPE.INSTRUCTOR,
     icon: "VscDashboard",
   },
+ 
   {
     id: 3,
     name: "My QUIZ",
@@ -27,6 +28,13 @@ export const sidebarLinks = [
     path: "/dashboard/add-course",
     type: ACCOUNT_TYPE.INSTRUCTOR,
     icon: "VscAdd",
+  },
+  {
+    id: 5,
+    name: "Uploaded",
+    path:  "/dashboard/Uploaded",
+    type: ACCOUNT_TYPE.INSTRUCTOR,
+    icon: "VscHistory",
   },
  /* {
     id: 5,
