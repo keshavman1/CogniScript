@@ -20,7 +20,7 @@ function Quizes() {
             instructor: "Neha Ma'am",
         },
         {
-            title: "NodeJS Overview Quiz",
+            title: "NodeJS Overview Quiz" ,
             instructor: "Amit Sir",
         },
         {
