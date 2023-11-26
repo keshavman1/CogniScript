@@ -8,11 +8,7 @@
     "@reduxjs/toolkit": "^1.9.5",
     "axios": "^1.5.1",
     "concurrently": "^8.2.1",
-<<<<<<< HEAD
-    "firebase": "^10.6.0",
-=======
-    "immer": "^10.0.3",
->>>>>>> 3485120289760e7c2a1e0efe0d5b8f2ed1dcccf7
+    
     "multer": "^1.4.5-lts.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -31,7 +27,8 @@
     "swiper": "^9.4.1",
     "validator": "^13.11.0",
     "video-react": "^0.16.0",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "immer": "^10.0.3"
   },
   "repository": {
     "type": "git",
