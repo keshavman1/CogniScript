@@ -41,3 +41,4 @@ result = collection.insert_one(document)
 print(f"Inserted document ID: {result.inserted_id}")
 
 client.close()
+A

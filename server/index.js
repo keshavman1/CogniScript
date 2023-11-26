@@ -6,7 +6,7 @@ const userRoutes = require("./routes/User");
 const profileRoutes = require("./routes/Profile");
 const paymentRoutes = require("./routes/Payments");
 const courseRoutes = require("./routes/Course");
-
+const { MongoClient, ObjectId } = require('mongodb');
 const { studentConnection } = require("./config/database");
 const { instructorConnection } = require("./config/database");
 const { testConnection } = require("./config/database");
@@ -23,6 +23,8 @@ const PORT = process.env.PORT || 4000;
 const multer  = require('multer')
 const path = require('path');
 const { spawn } = require('child_process');
+const Test = require('./models/Test')
+
 
 dotenv.config();
 
@@ -121,6 +123,29 @@ app.get("/", (req, res) => {
   });
 });
 
+const uri = "mongodb+srv://prakarmisheena:5rIp5UykvaqtaR81@cluster0.otxbose.mongodb.net/";
+
+const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+
+// Connect to MongoDB when the app starts
+client.connect(err => {
+  if (err) {
+    console.error('Error connecting to MongoDB', err);
+    return;
+  }
+  console.log('Connected to MongoDB');
+});
+
+app.get('/quizzes', async (req, res) => {
+  try {
+    const collection = client.db("quiz").collection("quizzes");
+    const quizzes = await collection.find({}).toArray();
+    res.json(quizzes);
+  } catch (error) {
+    console.error('Error fetching quizzes:', error);
+    res.status(500).send(error.message);
+  }
+});
 
 
 app.listen(PORT, () => {
