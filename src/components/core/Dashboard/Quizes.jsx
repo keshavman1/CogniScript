@@ -1,42 +1,29 @@
-import "./Quizzes.css"
+import React, { useEffect, useState } from 'react';
+import "./Quizzes.css";
 
 function Quizes() {
-    const quiz = [
-        {
-            title: "CSS Fundamentals Quiz",
-            instructor: "Rahul Sir",
-        },
-        {
-            title: "JavaScript Basics Quiz",
-            instructor: "Anita Ma'am",
-        },
-        {
-            title: "ReactJS Introduction Quiz",
-            instructor: "Vikas Sir",
-        },
-        {
-            title: "Web Design Principles Quiz",
-            instructor: "Neha Ma'am",
-        },
-        {
-            title: "NodeJS Overview Quiz",
-            instructor: "Amit Sir",
-        },
-        {
-            title: "Advanced HTML Techniques Quiz",
-            instructor: "Sonia Ma'am",
-        },
-        {
-            title: "Advanced HTML Techniques Quiz",
-            instructor: "Sonia Ma'am",
-        },
-    ]
-    
+    const [quizzes, setQuizzes] = useState([]);
 
-    return <div className="cards" style={{
-        paddingTop: "50px"
-    }}>
-{       quiz.map((q, index) => (
+    useEffect(() => {
+        const fetchQuizzes = async () => {
+            try {
+                const response = await fetch('http://localhost:4000/quizzes');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch');
+                }
+                const data = await response.json();
+                setQuizzes(data);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
+        fetchQuizzes();
+    }, []);
+
+    return (
+        <div className="cards" style={{ paddingTop: "50px" }}>
+            {quizzes.map((quiz, index) => (
                 <div 
                     key={index} 
                     className='card' 
@@ -50,15 +37,16 @@ function Quizes() {
                         background: "white"
                     }}>
                     <h1 style={{color: "black"}}>
-                        Hello {q.title}
+                        {quiz.uid}
                     </h1>
-                    <button className="btn-red">
+                    <p>Instructor: {quiz.teacher_id}</p>
+                    <button className="btn-red" >
                         Open Quiz
                     </button>
                 </div>
             ))}
-    </div>
+        </div>
+    );
 }
-
 
 export default Quizes;
