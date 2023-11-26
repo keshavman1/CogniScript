@@ -147,6 +147,25 @@ app.get('/quizzes', async (req, res) => {
   }
 });
 
+app.get('/quizzes/:quizId', async (req, res) => {
+  try {
+    const collection = client.db("quiz").collection("quizzes");
+    const quizId = req.params.quizId;
+
+    const quiz = await collection.findOne({ uid: quizId });
+
+    if (quiz) {
+      res.json(quiz);
+    } else {
+    res.status(404).send('Quiz not found');
+    }
+  } catch (error) {
+    console.error('Error fetching quizzes:', error);
+    res.status(500).send(error.message);
+  }
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`App is running at ${PORT}`);
