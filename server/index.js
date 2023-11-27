@@ -173,12 +173,13 @@ app.post('/submitAnswers', async (req, res) => {
   try {
     const { profile, answers } = req.body; // Retrieve user profile and answers from the request body
     const userId = profile.userId; // Assuming profile has the user's ID
-
+  
     console.log('Received profile:', profile);
     console.log('Received answers:', answers);
+    const name = `${profile.firstName}` + " " + `${profile.lastName}`
 
     // Store profile along with answers in the database inside the user's folder
-    const studentTestCollection = client.db("quiz").collection("students_test");
+    const studentTestCollection = client.db("students_test").collection(`${name}`);
 
     // Update logic to associate answers with the user's profile
     const filter = { userId }; // Filter to find the specific user

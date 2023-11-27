@@ -33,7 +33,7 @@ function Quizes() {
 
     useEffect(() => {
         if (user) {
-            setProfile(user); // Update the profile state with the user data
+            setProfile(user);
         }
     }, [user]);
 
@@ -144,13 +144,14 @@ function Quizes() {
                 }}
                 className="btn-white"
                 onClick={async () => {
+                    console.log(user);
                     try {
-                        const response = await fetch(`${baseURL}/submitAnswers`, {
+                        const response = await fetch("http://localhost:4000/submitAnswers", {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify({ profile, answers: userAnswers }), // Include user profile along with answers
+                            body: JSON.stringify({ profile, answers: userAnswers , quizId}), // Include user profile along with answers
                         });
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
