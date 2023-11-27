@@ -165,6 +165,41 @@ app.get('/quizzes/:quizId', async (req, res) => {
   }
 });
 
+// ... (Your existing code)
+
+// ... (Previous code remains the same)
+
+app.post('/submitAnswers', async (req, res) => {
+  try {
+    const { profile, answers } = req.body; // Retrieve user profile and answers from the request body
+    const userId = profile.userId; // Assuming profile has the user's ID
+
+    console.log('Received profile:', profile);
+    console.log('Received answers:', answers);
+
+    // Store profile along with answers in the database inside the user's folder
+    const studentTestCollection = client.db("quiz").collection("students_test");
+
+    // Update logic to associate answers with the user's profile
+    const filter = { userId }; // Filter to find the specific user
+    const updateDoc = {
+      $set: { answers } // Set the answers for the user's profile
+    };
+    await studentTestCollection.updateOne(filter, updateDoc, { upsert: true });
+
+    res.status(200).json({ success: true, message: 'Answers stored successfully' });
+  } catch (error) {
+    console.error('Error storing answers:', error);
+    res.status(500).send(error.message);
+  }
+});
+
+
+
+// ... (Other existing routes and code)
+
+// ... (
+
 
 
 app.listen(PORT, () => {
