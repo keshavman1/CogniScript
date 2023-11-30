@@ -146,6 +146,46 @@ app.get('/quizzes', async (req, res) => {
   }
 });
 
+app.get('/SCORES', async (req, res) => {
+  try {
+    const db = client.db("students_test");
+
+    // Fetch all collection names
+    const collectionsCursor = await db.listCollections({}, { nameOnly: true });
+    const collections = await collectionsCursor.toArray();
+    const collectionNames = collections.map(collection => collection.name);
+
+    let allSCORES = [];
+
+    // Iterate over each collection and fetch SCORES
+    for (const collectionName of collectionNames) {
+      const collection = db.collection(collectionName);
+      const documents = await collection.find({}).toArray();
+
+      // Log documents for debugging
+      console.log("Documents in collection", collectionName, ":", documents);
+
+      let studentSCORES = { name: collectionName, SCORES: [] };
+      documents.forEach(doc => {
+        if (doc.SCORES && Array.isArray(doc.SCORES)) {
+          studentSCORES.SCORES.push(...doc.SCORES);
+        }
+      });
+
+      // Add this student's SCORES to the allSCORES array
+      allSCORES.push(studentSCORES);
+    }
+
+    res.json(allSCORES);
+  } catch (error) {
+    console.error('Error fetching SCORES:', error);
+    res.status(500).send(error.message);
+  }
+});
+
+
+
+
 app.get('/quizzes/:quizId', async (req, res) => {
   try {
     const collection = client.db("quiz").collection("quizzes");
@@ -166,7 +206,7 @@ app.get('/quizzes/:quizId', async (req, res) => {
 
 app.post('/generateResults', async (req, res) => {
   try {
-    const { coll, scores } = req.body;
+    const { coll, SCORES } = req.body;
     client.connect(err => {
       if (err) {
         console.error('Error connecting to MongoDB', err);
@@ -178,7 +218,7 @@ app.post('/generateResults', async (req, res) => {
 
     const update = {
       $set: {
-        SCORES : scores,
+        SCORES : SCORES,
       },
     };
   
