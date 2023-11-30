@@ -5,6 +5,57 @@ import { formattedDate } from "../../../utils/dateFormatter"
 import IconBtn from "../../common/IconBtn"
 import { ACCOUNT_TYPE } from "../../../utils/constants"
 const API_KEY = "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"
+
+const maxRetries = 10;
+let retries = 0;
+
+async function makeOpenAIRequest(answerss, ans, j) {
+  try {
+    const response = await fetch("https://api.openai.com/v1/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${API_KEY}`,
+        "Content-type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "text-davinci-003",
+        prompt: `Correct_answer should be - ${answerss[j][0]}\nStudent's Answer - ${ans} Compare the similarity between the two statements above. Just provide the score ranging from 0 to 10. No need for any extra sentences. If completely incorrect give a 0.`,
+        max_tokens: 300,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`Request failed with status: ${response.status}`);
+      return null;
+    }
+
+    const responseData = await response.json();
+    return responseData;
+  } catch (error) {
+    console.error("Error making request:", error);
+    return null;
+  }
+}
+
+async function performOpenAIRequestWithRetry(answerss, ans, j) {
+  while (retries < maxRetries) {
+    const result = await makeOpenAIRequest(answerss, ans, j);
+
+    if (result !== null) {
+      return result;
+    }
+
+    retries += 1;
+    const waitTime = Math.pow(2, retries) * 1000;
+    console.log(`Retrying in ${waitTime / 1000} seconds...`);
+    await new Promise((resolve) => setTimeout(resolve, waitTime));
+  }
+
+  console.error("Max retries reached. Unable to make a successful request.");
+  return null;
+}
+
+
 const fetchQuizzes = async () => {
   let questionss, answerss;
   try {
@@ -26,26 +77,18 @@ const fetchQuizzes = async () => {
       let j = 0;
       const scoress = [];
       for (const ans of d.answers) {
-    /*  ,
-      })*/
-        const response = await fetch("https://api.openai.com/v1/completions", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${API_KEY}`,
-                "Content-type" : "application/json"
-            },
-            body: JSON.stringify({
-            model: "text-davinci-003",
-            prompt: "Correct_answer should be - "+answerss[j][0]+"\nStudent's Answer - "+ans+"Compare the similarity between the two statements above. Just provide the score ranging from 0 to 10. No need for any extra sentences. If completely incorrect give a 0.",
-            max_tokens: 300
-            })  
-        })  
-        const datas = await response.json();
-        console.log("DATA : ", datas)
+      const datas = await performOpenAIRequestWithRetry(answerss, ans, j);
+
+      if (datas) {
+        console.log("DATA : ", datas);
         const sc = datas.choices[0].text.match(/\d+/);
         const score = parseInt(sc[0], 10);
-        scoress.push(score)
+        scoress.push(score);
         j = j + 1;
+      } else {
+        console.error("OpenAI request failed after retries.");
+        // Handle failure as needed
+      }
       }
       const scoreResponse = await fetch(`http://localhost:4000/generateResults`, {
         method: 'POST',
