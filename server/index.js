@@ -1,4 +1,3 @@
-
 const express = require("express");
 const app = express();
 const Quiz = require('./models/Quiz')
@@ -165,30 +164,74 @@ app.get('/quizzes/:quizId', async (req, res) => {
   }
 });
 
+app.post('/generateResults', async (req, res) => {
+  try {
+    const { coll, scores } = req.body;
+    client.connect(err => {
+      if (err) {
+        console.error('Error connecting to MongoDB', err);
+        return;
+      }
+      console.log('Connected to MongoDB');
+    });
+    const collection = client.db('students_test').collection(coll)
+
+    const update = {
+      $set: {
+        SCORES : scores,
+      },
+    };
+  
+    // Update the document
+    collection.updateOne({}, update, (err, result) => {
+      if (err) {
+        console.error('Error updating document:', err);
+      } else {
+        console.log('Document updated successfully');
+      }
+    });
+
+    res.status(200).json("HO RHA HAI!");
+  } catch (error) {
+    console.log("ERROR : ", error);
+    res.status(500).send(error.message);
+  }
+});
+
+
 // ... (Your existing code)
 
 // ... (Previous code remains the same)
 
 app.post('/submitAnswers', async (req, res) => {
   try {
-    const { profile, answers } = req.body; // Retrieve user profile and answers from the request body
-    const userId = profile.userId; // Assuming profile has the user's ID
-  
+    const { profile, answers } = req.body;
+    const userId = profile.userId;
+    const name = `${profile.firstName} ${profile.lastName}`;
+    const SCORES = []
     console.log('Received profile:', profile);
     console.log('Received answers:', answers);
-    const name = `${profile.firstName}` + " " + `${profile.lastName}`
 
-    // Store profile along with answers in the database inside the user's folder
-    const studentTestCollection = client.db("students_test").collection(`${name}`);
+    // Use the user's name to dynamically create a collection
+    const studentTestCollection = client.db("students_test").collection(name);
 
-    // Update logic to associate answers with the user's profile
-    const filter = { userId }; // Filter to find the specific user
-    const updateDoc = {
-      $set: { answers } // Set the answers for the user's profile
+    // Create a new document with the user's answers
+    const document = {
+      userId,
+      profile,
+      answers,
+      SCORES,
+      // Add other fields as needed
     };
-    await studentTestCollection.updateOne(filter, updateDoc, { upsert: true });
 
-    res.status(200).json({ success: true, message: 'Answers stored successfully' });
+    // Insert the document into the collection
+    const result = await studentTestCollection.insertOne(document);
+
+    if (result.insertedCount === 1) {
+      res.status(200).json({ success: true, message: 'Answers stored successfully' });
+    } else {
+      res.status(500).json({ success: false, message: 'Failed to store answers' });
+    }
   } catch (error) {
     console.error('Error storing answers:', error);
     res.status(500).send(error.message);
@@ -196,6 +239,49 @@ app.post('/submitAnswers', async (req, res) => {
 });
 
 
+app.get('/getAnswers', async (req, res) => {
+  try {
+    client.connect(err => {
+      if (err) {
+        console.error('Error connecting to MongoDB', err);
+        return;
+      }
+      console.log('Connected to MongoDB');
+    });
+  /*  const testId = req.test_id;
+
+    if (!testId) {
+      return res.status(400).json({ error: 'test_id is required in the query parameters' });
+    }
+    */
+    const database = client.db("students_test");
+
+    // Get the list of collections in the database
+    const collections = await database.listCollections().toArray();
+
+    const results = [];
+
+    for (const collectionInfo of collections) {
+      const collectionName = collectionInfo.name;
+      const collection = database.collection(collectionName);
+
+      const quizzes = await collection.find({}).toArray();  
+
+    /*  results.push({ collection: collectionName, quizzes });  */
+      for (const quiz of quizzes) {
+        if (quiz && quiz.answers) {
+          results.push({ collection: collectionName, answers: quiz.answers });
+        }
+      }
+    }
+
+    // Respond with the matching quizzes across all collections
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching quizzes:', error);
+    res.status(500).send(error.message);
+  } 
+});
 
 // ... (Other existing routes and code)
 

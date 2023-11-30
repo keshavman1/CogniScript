@@ -19,7 +19,7 @@ for paragraph in doc.paragraphs:
 
 patternQ = 'Q\d+\.(.*?)\?'
 matchesQ = re.findall(patternQ, doc_text)
-patternA = 'Ans\d+\.(.*?)\.'
+patternA = 'Ans\d+\.(.*?)(?=(Q\d+|$))'
 matchesA = re.findall(patternA, doc_text)
 
 questions.extend(matchesQ)
@@ -41,4 +41,3 @@ result = collection.insert_one(document)
 print(f"Inserted document ID: {result.inserted_id}")
 
 client.close()
-A

@@ -11,10 +11,6 @@ function Quizes() {
 
     const { user } = useSelector((state) => state.profile); // Access user profile from Redux
 
-    const [profile, setProfile] = useState(null); 
-    const [time, setTime] = useState(60); // 60 seconds
-    const [timerActive, setTimerActive] = useState(false);
-
     useEffect(() => {
         const fetchQuizzes = async () => {
             try {
@@ -24,7 +20,7 @@ function Quizes() {
                 }
                 const data = await response.json();
                 setQuizzes(data);
-                console.log(data);
+                console.log("THIS : ", data[0].questions);
                 setQuestions(data[0].questions);
                 setUserAnswers(Array.from({ length: data[0].questions.length }, () => ''));
             } catch (error) {
@@ -41,54 +37,13 @@ function Quizes() {
         }
     }, [user]);
 
-    useEffect(() => {
-        let interval;
-        if (timerActive) {
-            interval = setInterval(() => {
-                if (time > 0) {
-                    setTime(prevTime => prevTime - 1);
-                } else {
-                    clearInterval(interval);
-                    submitQuiz();
-                }
-            }, 1000);
-        }
-        return () => clearInterval(interval);
-    }, [time, timerActive]);
+    const [profile, setProfile] = useState(null); 
 
-    const submitQuiz = async () => {
-        try {
-            const response = await fetch("http://localhost:4000/submitAnswers", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ profile, answers: userAnswers }), // Include user profile and answers
-            });
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            console.log('Answers submitted successfully!');
-            // Clear user answers or perform any other action upon successful submission
-        } catch (error) {
-            console.error('Fetch error:', error);
-        }
-    };
-
-    const formatTime = (time) => {
-        const minutes = Math.floor(time / 60);
-        const seconds = time % 60;
-        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    };
+    // Placeholder for user ID obtained after authentication
+    // const userId = '6561820e510c0f0009bf1f89'; // Replace this with actual user ID after authentication
 
     return (
         <div>
-            {timerActive && (
-                <div className="timer" style={{ position: "fixed", top: "9px", right: "150px", color: time <= 60 ? "red" : "white", fontWeight: "600", fontSize: "20px", border: "2px solid red", padding: "5px" }}>
-                    Timer: {formatTime(time)}
-                </div>
-            )}
-
             <div className='cards' style={{ paddingTop: "50px" }}> 
                 {selectedQuiz && quizzes.map((quiz, index) => (
                     <div 
@@ -117,8 +72,6 @@ function Quizes() {
                                 setView(false);
                                 setQuestions(quizData.questions);
                                 setUserAnswers(Array.from({ length: quizData.questions.length }, () => ''));
-                                setTime(60); // Set timer to 60 seconds when the quiz is opened
-                                setTimerActive(true); // Start the timer when the quiz is opened
                                 console.log('Quiz data:', quizData);
                             } catch (error) {
                                 console.error('Fetch error:', error);
@@ -141,7 +94,6 @@ function Quizes() {
                         className="btn-white" 
                         onClick={() => {
                             setView(true);
-                            setTimerActive(false); // Close the quiz, stop the timer
                         }}
                     >
                         Close Quiz
@@ -183,21 +135,36 @@ function Quizes() {
                         </div>
                     ))}
 
-                    <button
-                        style={{
-                            alignContent: "center",
-                            justifyContent: "center",
-                            margin: "30px auto",
-                            display: "block"
-                        }}
-                        className="btn-white"
-                        onClick={() => {
-                            setTimerActive(false); // Stop the timer manually if the quiz is submitted
-                            submitQuiz();
-                        }}
-                    >
-                        Submit
-                    </button>
+<button
+                style={{
+                    alignContent: "center",
+                    justifyContent: "center",
+                    margin: "20px auto",
+                    display: "block"
+                }}
+                className="btn-white"
+                onClick={async () => {
+                    console.log(user);
+                    try {
+                        const response = await fetch("http://localhost:4000/submitAnswers", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ profile, answers: userAnswers }), // Include user profile along with answers
+                        });
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        console.log('Answers submitted successfully!');
+                        // Clear user answers or perform any other action upon successful submission
+                    } catch (error) {
+                        console.error('Fetch error:', error);
+                    }
+                }}
+            >
+                Submit
+            </button>
                 </div>
             )}
         </div>

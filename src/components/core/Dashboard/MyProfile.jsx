@@ -4,6 +4,73 @@ import { useNavigate } from "react-router-dom"
 import { formattedDate } from "../../../utils/dateFormatter"
 import IconBtn from "../../common/IconBtn"
 import { ACCOUNT_TYPE } from "../../../utils/constants"
+const API_KEY = "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"
+const fetchQuizzes = async () => {
+  let questionss, answerss;
+  try {
+    // Fetch quizzes
+    const quizzesResponse = await fetch(`http://localhost:4000/quizzes`);
+    if (!quizzesResponse.ok) {
+      throw new Error('Failed to fetch quizzes');
+    }
+    const quizzesData = await quizzesResponse.json();
+    questionss = quizzesData[0].questions;
+    answerss = quizzesData[0].answers;
+    // Fetch answers
+    const answersResponse = await fetch(`http://localhost:4000/getAnswers`);
+    if (!answersResponse.ok) {
+      throw new Error('Failed to fetch answers');
+    }
+    const answersData = await answersResponse.json();
+    for (const d of answersData) {
+      let j = 0;
+      const scoress = [];
+      for (const ans of d.answers) {
+    /*  ,
+      })*/
+        const response = await fetch("https://api.openai.com/v1/completions", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${API_KEY}`,
+                "Content-type" : "application/json"
+            },
+            body: JSON.stringify({
+            model: "text-davinci-003",
+            prompt: "Correct_answer should be - "+answerss[j][0]+"\nStudent's Answer - "+ans+"Compare the similarity between the two statements above. Just provide the score ranging from 0 to 10. No need for any extra sentences. If completely incorrect give a 0.",
+            max_tokens: 300
+            })  
+        })  
+        const datas = await response.json();
+        console.log("DATA : ", datas)
+        const sc = datas.choices[0].text.match(/\d+/);
+        const score = parseInt(sc[0], 10);
+        scoress.push(score)
+        j = j + 1;
+      }
+      const scoreResponse = await fetch(`http://localhost:4000/generateResults`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          coll : d.collection,
+          scores : scoress,
+          // Add other data if needed
+        })
+      })
+      console.log("DONEONEON")
+    }
+  } catch (error) {
+    // Check if the error is due to non-JSON response
+    if (error instanceof SyntaxError) {
+      console.error('Non-JSON response received. Check the server response:', error.message);
+    } else {
+      console.error('Error:', error);
+    }
+  }
+};
+
+
 
 export default function MyProfile() {
   const { user } = useSelector((state) => state.profile)
@@ -120,7 +187,7 @@ export default function MyProfile() {
       </>
     )
   }
-  else if (user?.accountType == ACCOUNT_TYPE.INSTRUCTOR)
+  else if (user?.accountType === ACCOUNT_TYPE.INSTRUCTOR)
   {
     return (
       <>
@@ -159,7 +226,10 @@ export default function MyProfile() {
             <IconBtn
               text="Edit"
               onclick={() => {
-                navigate("/dashboard/settings")
+               {/* navigate("/dashboard/settings") */}
+                
+        
+                fetchQuizzes();
               }}
             >
               <RiEditBoxLine />
