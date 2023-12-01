@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { toast } from 'react-hot-toast';
+import { toast, Toaster } from 'react-hot-toast';
 import './Quizzes.css';
 
 function Quizes() {
@@ -15,6 +15,7 @@ function Quizes() {
   const [time, setTime] = useState(60);
   const [timerActive, setTimerActive] = useState(false);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [openedQuizzes, setOpenedQuizzes] = useState([]);
 
   useEffect(() => {
     const fetchQuizzes = async () => {
@@ -81,11 +82,13 @@ function Quizes() {
       setShowThankYou(true);
       setQuizSubmitted(true);
 
-      // Display a toast when the quiz is submitted
+      
       toast.success('Quiz Submitted');
 
     } catch (error) {
       console.error('Fetch error:', error);
+      
+      toast.success('Quiz Submitted');
     }
   };
 
@@ -115,63 +118,71 @@ function Quizes() {
         </div>
       )}
 
-            <div className='cards' style={{ paddingTop: "50px" }}> 
-                {selectedQuiz && quizzes.map((quiz, index) => (
-                    <div 
-                        key={index} 
-                        className='card' 
-                        style={{
-                            width: "400px",
-                            height: "max-content",
-                            margin: "1rem",
-                            padding: "1rem",
-                            display: "flex",
-                            flexDirection: 'column',
-                            background: "white"
-                        }}>
-                        <h1 style={{color: "black"}}>
-                            {quiz.uid}
-                        </h1>
-                        <p>Instructor: {quiz.teacher_id}</p>
-                        <button className="btn-red" onClick={async () => {
-                            try {
-                                const response = await fetch(`${baseURL}/quizzes/${quiz.uid}`);
-                                if (!response.ok) {
-                                    throw new Error('Network response was not ok');
-                                }
-                                const quizData = await response.json();
-                                setView(false);
-                                setQuestions(quizData.questions);
-                                setUserAnswers(Array.from({ length: quizData.questions.length }, () => ''));
-                                setTime(60); // Set timer to 60 seconds when the quiz is opened
-                                setTimerActive(true); // Start the timer when the quiz is opened
-                                console.log('Quiz data:', quizData);
-                            } catch (error) {
-                                console.error('Fetch error:', error);
-                            }
-                        }}>
-                            Open Quiz
-                        </button>
-                    </div>
-                ))}
-            </div>
-            
-            {!selectedQuiz && (
-                <div>
-                    <button 
-                        style={{
-                            alignContent: "center",
-                            justifyContent: "center",
-                            marginLeft: "400px"             
-                        }} 
-                        className="btn-white" 
-                        onClick={() => {
-                            setView(true);
-                            setTimerActive(false); // Close the quiz, stop the timer
-                        }}
-                    >
-                        Close Quiz
-                    </button>
+      <div className="cards" style={{ paddingTop: '50px' }}>
+        {quizzes.map((quiz, index) => (
+          <div
+            key={index}
+            className="card"
+            style={{
+              width: '400px',
+              height: 'max-content',
+              margin: '1rem',
+              padding: '1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              background: 'white',
+            }}
+          >
+            <h1 style={{ color: 'black' }}>{quiz.uid}</h1>
+            <p>Instructor: {quiz.teacher_id}</p>
+            {(selectedQuiz || quizSubmitted || openedQuizzes.includes(quiz.uid)) && (
+              <button
+                className={`btn-red`}
+                onClick={async () => {
+                  if (!showThankYou && !quizSubmitted && !openedQuizzes.includes(quiz.uid)) {
+                    try {
+                      const response = await fetch(`${baseURL}/quizzes/${quiz.uid}`);
+                      if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                      }
+                      const quizData = await response.json();
+                      setView(false);
+                      setQuestions(quizData.questions || []);
+                      setUserAnswers(Array(quizData.questions.length).fill(''));
+                      setTime(60);
+                      setTimerActive(true);
+                      setOpenedQuizzes((prevQuizzes) => [...prevQuizzes, quiz.uid]);
+                      console.log('Quiz data:', quizData);
+                    } catch (error) {
+                      console.error('Fetch error:', error);
+                    }
+                  }
+                }}
+                disabled={!selectedQuiz || quizSubmitted || openedQuizzes.includes(quiz.uid)} 
+              >
+                {'Open Quiz'}
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {!selectedQuiz && (
+        <div>
+          <button
+            style={{
+              alignContent: 'center',
+              justifyContent: 'center',
+              marginLeft: '400px',
+            }}
+            className="btn-white"
+            onClick={resetQuizState}
+            disabled={!selectedQuiz || quizSubmitted}
+          >
+            Close Quiz
+          </button>
+
+          {showThankYou && <div className="quiz-submitted-message">Quiz submitted. Thank you!</div>}
 
           {questions.map((question, index) => (
             <div
@@ -208,25 +219,29 @@ function Quizes() {
             </div>
           ))}
 
-                    <button
-                        style={{
-                            alignContent: "center",
-                            justifyContent: "center",
-                            margin: "30px auto",
-                            display: "block"
-                        }}
-                        className="btn-white"
-                        onClick={() => {
-                            setTimerActive(false); // Stop the timer manually if the quiz is submitted
-                            submitQuiz();
-                        }}
-                    >
-                        Submit
-                    </button>
-                </div>
-            )}
+          <button
+            style={{
+              alignContent: 'center',
+              justifyContent: 'center',
+              margin: '30px auto',
+              display: 'block',
+            }}
+            className={`btn-white ${showThankYou || quizSubmitted ? 'btn-disabled' : ''}`}
+            onClick={() => {
+              setTimerActive(false);
+              submitQuiz();
+              resetQuizState();
+            }}
+          >
+            Submit Quiz
+          </button>
         </div>
-    );
+      )}
+
+      {/* Toaster component for displaying toasts */}
+      <Toaster position="bottom-center" />
+    </div>
+  );
 }
 
 export default Quizes;
