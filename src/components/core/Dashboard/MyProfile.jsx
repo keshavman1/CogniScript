@@ -316,27 +316,43 @@ export default function MyProfile() {
     }else {
       return (
         <>
-          <div className="cards">
-            {
-              scores.map((score, index) => (
-                
-                <div className="card2" style={
-                  {
+            <div className="cards">
+              {scores.map((score, index) => (
+                <div
+                  className="card2"
+                  style={{
                     display: "flex",
-                    direction: "column"
-                  }
-                }>
-                  <h1 className="course-name">
+                    flexDirection: "column",
+                    border: "1px solid #ccc",
+                    borderRadius: "8px",
+                    padding: "10px",
+                    marginBottom: "20px",
+                    boxShadow: "0px 2px 4px rgba(0, 0, 0, 0.1)",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <h1 className="course-name" style={{ fontSize: "24px", marginBottom: "10px" }}>
                     {score.name}
                   </h1>
-              
-                  <div className="course-name">
-                    {score.SCORES}
-                  </div>
+                  
+                  {score.SCORES.map((scoreElement, scoreIndex) => (
+                    <h1 key={scoreIndex} style={{ fontSize: "18px", fontWeight: "bold" }}>
+                      {scoreElement}
+                    </h1>
+                  ))}
+                  <h1 style={{
+                    fontWeight: "bold"
+                  }}>
+                    ____________________________________________
+                  </h1>
+                  <h1 style={{ fontSize: "18px", fontWeight: "bold" }}>
+                    Total Score: {score.SCORES.reduce((a, b) => a + b, 0)}
+                  </h1>
                 </div>
-              ))
-            }
-          </div>
+              ))}
+            </div>
+
+
           <button className="btn-white" onClick={() => setSelected(true)} style={{
             marginLeft: "405px",
             marginTop: "30px"
