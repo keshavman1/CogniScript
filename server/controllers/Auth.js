@@ -124,21 +124,21 @@ exports.signup = async (req, res) => {
 				security_info: null,
 				image: `https://api.dicebear.com/5.x/initials/svg?seed=${firstName} ${lastName}`,
 			});
-			const Stname = firstName + ' ' + lastName;
-			const pythonProcess = spawn('python', ['./controllers/studenttry.py', Stname]);
+			// const Stname = firstName + ' ' + lastName;
+			// const pythonProcess = spawn('python', ['./controllers/studenttry.py', Stname]);
 
-			pythonProcess.stdout.on('data', (data) => {
-				console.log(`Python script output: ${data}`);
-			});
+			// pythonProcess.stdout.on('data', (data) => {
+			// 	console.log(`Python script output: ${data}`);
+			// });
 
-			pythonProcess.stderr.on('data', (data) => {
-				console.error(`Error in Python script: ${data}`);
-			});
+			// pythonProcess.stderr.on('data', (data) => {
+			// 	console.error(`Error in Python script: ${data}`);
+			// });
 
-			pythonProcess.on('close', (code) => {
-				console.log(`Python script exited with code ${code}`);
-				res.status(200).json({ success: true, message: 'Data saved and Python script executed successfully' });
-			}); 
+			// pythonProcess.on('close', (code) => {
+			// 	console.log(`Python script exited with code ${code}`);
+			// 	res.status(200).json({ success: true, message: 'Data saved and Python script executed successfully' });
+			// }); 
 
         } else if (accountType === "Instructor") {
 			const existingUser = await Instructor.findOne({ email });

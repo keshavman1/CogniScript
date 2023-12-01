@@ -115,69 +115,63 @@ function Quizes() {
         </div>
       )}
 
-      <div className="cards" style={{ paddingTop: '50px' }}>
-        {quizzes.map((quiz, index) => (
-          <div
-            key={index}
-            className="card"
-            style={{
-              width: '400px',
-              height: 'max-content',
-              margin: '1rem',
-              padding: '1rem',
-              display: 'flex',
-              flexDirection: 'column',
-              background: 'white',
-            }}
-          >
-            <h1 style={{ color: 'black' }}>{quiz.uid}</h1>
-            <p>Instructor: {quiz.teacher_id}</p>
-            {(selectedQuiz || quizSubmitted) && (
-              <button
-                className={`btn-red`}
-                onClick={async () => {
-                  if (!showThankYou && !quizSubmitted) {
-                    try {
-                      const response = await fetch(`${baseURL}/quizzes/${quiz.uid}`);
-                      if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                      }
-                      const quizData = await response.json();
-                      setView(false);
-                      setQuestions(quizData.questions || []);
-                      setUserAnswers(Array(quizData.questions.length).fill(''));
-                      setTime(60);
-                      setTimerActive(true);
-                      console.log('Quiz data:', quizData);
-                    } catch (error) {
-                      console.error('Fetch error:', error);
-                    }
-                  }
-                }}
-                disabled={!selectedQuiz || quizSubmitted} 
-              >
-                {'Open Quiz'}
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {!selectedQuiz && (
-        <div>
-          <button
-            style={{
-              alignContent: 'center',
-              justifyContent: 'center',
-              marginLeft: '400px',
-            }}
-            className="btn-white"
-            onClick={resetQuizState}
-          >
-            Close Quiz
-          </button>
-
-          {showThankYou && <div className="quiz-submitted-message">Quiz submitted. Thank you!</div>}
+            <div className='cards' style={{ paddingTop: "50px" }}> 
+                {selectedQuiz && quizzes.map((quiz, index) => (
+                    <div 
+                        key={index} 
+                        className='card' 
+                        style={{
+                            width: "400px",
+                            height: "max-content",
+                            margin: "1rem",
+                            padding: "1rem",
+                            display: "flex",
+                            flexDirection: 'column',
+                            background: "white"
+                        }}>
+                        <h1 style={{color: "black"}}>
+                            {quiz.uid}
+                        </h1>
+                        <p>Instructor: {quiz.teacher_id}</p>
+                        <button className="btn-red" onClick={async () => {
+                            try {
+                                const response = await fetch(`${baseURL}/quizzes/${quiz.uid}`);
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok');
+                                }
+                                const quizData = await response.json();
+                                setView(false);
+                                setQuestions(quizData.questions);
+                                setUserAnswers(Array.from({ length: quizData.questions.length }, () => ''));
+                                setTime(60); // Set timer to 60 seconds when the quiz is opened
+                                setTimerActive(true); // Start the timer when the quiz is opened
+                                console.log('Quiz data:', quizData);
+                            } catch (error) {
+                                console.error('Fetch error:', error);
+                            }
+                        }}>
+                            Open Quiz
+                        </button>
+                    </div>
+                ))}
+            </div>
+            
+            {!selectedQuiz && (
+                <div>
+                    <button 
+                        style={{
+                            alignContent: "center",
+                            justifyContent: "center",
+                            marginLeft: "400px"             
+                        }} 
+                        className="btn-white" 
+                        onClick={() => {
+                            setView(true);
+                            setTimerActive(false); // Close the quiz, stop the timer
+                        }}
+                    >
+                        Close Quiz
+                    </button>
 
           {questions.map((question, index) => (
             <div
@@ -214,26 +208,25 @@ function Quizes() {
             </div>
           ))}
 
-          <button
-            style={{
-              alignContent: 'center',
-              justifyContent: 'center',
-              margin: '30px auto',
-              display: 'block',
-            }}
-            className={`btn-white ${showThankYou || quizSubmitted ? 'btn-disabled' : ''}`}
-            onClick={() => {
-              setTimerActive(false);
-              submitQuiz();
-              resetQuizState();
-            }}
-          >
-            Submit Quiz
-          </button>
+                    <button
+                        style={{
+                            alignContent: "center",
+                            justifyContent: "center",
+                            margin: "30px auto",
+                            display: "block"
+                        }}
+                        className="btn-white"
+                        onClick={() => {
+                            setTimerActive(false); // Stop the timer manually if the quiz is submitted
+                            submitQuiz();
+                        }}
+                    >
+                        Submit
+                    </button>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
 
 export default Quizes;
