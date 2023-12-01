@@ -1,49 +1,120 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import "./Quizzes.css";
+import { toast } from 'react-hot-toast';
+import './Quizzes.css';
 
 function Quizes() {
-    const [quizzes, setQuizzes] = useState([]);
-    const [selectedQuiz, setView] = useState(true); 
-    const [questions, setQuestions] = useState([]);
-    const [userAnswers, setUserAnswers] = useState(Array.from({ length: 0 }, () => ''));
-    const baseURL = 'http://localhost:4000'; // Your base URL
+  const [quizzes, setQuizzes] = useState([]);
+  const [selectedQuiz, setView] = useState(true);
+  const [questions, setQuestions] = useState([]);
+  const [userAnswers, setUserAnswers] = useState([]);
+  const [baseURL] = useState('http://localhost:4000');
+  const { user } = useSelector((state) => state.profile);
+  const [showThankYou, setShowThankYou] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [time, setTime] = useState(60);
+  const [timerActive, setTimerActive] = useState(false);
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
 
-    const { user } = useSelector((state) => state.profile); // Access user profile from Redux
-
-    useEffect(() => {
-        const fetchQuizzes = async () => {
-            try {
-                const response = await fetch(`${baseURL}/quizzes`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch');
-                }
-                const data = await response.json();
-                setQuizzes(data);
-                console.log("THIS : ", data[0].questions);
-                setQuestions(data[0].questions);
-                setUserAnswers(Array.from({ length: data[0].questions.length }, () => ''));
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
-
-        fetchQuizzes();
-    }, [baseURL]);
-
-    useEffect(() => {
-        if (user) {
-            setProfile(user);
+  useEffect(() => {
+    const fetchQuizzes = async () => {
+      try {
+        const response = await fetch(`${baseURL}/quizzes`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch');
         }
-    }, [user]);
+        const data = await response.json();
+        setQuizzes(data);
+        setQuestions(data[0]?.questions || []);
+        setUserAnswers(Array(data[0]?.questions.length).fill(''));
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
 
-    const [profile, setProfile] = useState(null); 
+    fetchQuizzes();
+  }, [baseURL]);
 
-    // Placeholder for user ID obtained after authentication
-    // const userId = '6561820e510c0f0009bf1f89'; // Replace this with actual user ID after authentication
+  useEffect(() => {
+    if (user) {
+      setProfile(user);
+    }
+  }, [user]);
 
-    return (
-        <div>
+  useEffect(() => {
+    let interval;
+    if (timerActive) {
+      interval = setInterval(() => {
+        if (time > 0) {
+          setTime((prevTime) => prevTime - 1);
+        } else {
+          clearInterval(interval);
+          submitQuiz();
+        }
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [time, timerActive]);
+
+  const resetQuizState = () => {
+    setView(true);
+    setTimerActive(false);
+    setShowThankYou(false);
+    setQuizSubmitted(false);
+  };
+
+  const submitQuiz = async () => {
+    try {
+      const response = await fetch(`${baseURL}/submitAnswers`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ profile, answers: userAnswers }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      console.log('Answers submitted successfully!');
+      setShowThankYou(true);
+      setQuizSubmitted(true);
+
+      // Display a toast when the quiz is submitted
+      toast.success('Quiz Submitted');
+
+    } catch (error) {
+      console.error('Fetch error:', error);
+    }
+  };
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  return (
+    <div>
+      {timerActive && (
+        <div
+          className="timer"
+          style={{
+            position: 'fixed',
+            top: '9px',
+            right: '150px',
+            color: time <= 60 ? 'red' : 'white',
+            fontWeight: '600',
+            fontSize: '20px',
+            border: '2px solid red',
+            padding: '5px',
+          }}
+        >
+          Timer: {formatTime(time)}
+        </div>
+      )}
+
             <div className='cards' style={{ paddingTop: "50px" }}> 
                 {selectedQuiz && quizzes.map((quiz, index) => (
                     <div 
@@ -72,6 +143,8 @@ function Quizes() {
                                 setView(false);
                                 setQuestions(quizData.questions);
                                 setUserAnswers(Array.from({ length: quizData.questions.length }, () => ''));
+                                setTime(60); // Set timer to 60 seconds when the quiz is opened
+                                setTimerActive(true); // Start the timer when the quiz is opened
                                 console.log('Quiz data:', quizData);
                             } catch (error) {
                                 console.error('Fetch error:', error);
@@ -94,77 +167,62 @@ function Quizes() {
                         className="btn-white" 
                         onClick={() => {
                             setView(true);
+                            setTimerActive(false); // Close the quiz, stop the timer
                         }}
                     >
                         Close Quiz
                     </button>
 
-                    {questions.map((question, index) => (
-                        <div 
-                            key={index} 
-                            className='card2' 
-                            style={{
-                                width: "1000px",
-                                height: "max-content",
-                                margin: "1rem",
-                                padding: "1rem",
-                                display: "flex",
-                                flexDirection: 'column',
-                                background: "white",
-                            }}>
-                            <h1 style={{color: "black", fontWeight: "bold"}}>
-                                Question. {question}
-                            </h1>
-                            <br />
-                            <textarea
-                                value={userAnswers[index]}
-                                onChange={(e) => {
-                                    const updatedAnswers = [...userAnswers];
-                                    updatedAnswers[index] = e.target.value;
-                                    setUserAnswers(updatedAnswers);
-                                }}
-                                name={`answer-${index}`}
-                                id={`answer-${index}`}
-                                cols="100"
-                                rows="5"
-                                style={{
-                                    borderColor: "black",
-                                    borderWidth: "2px"
-                                }}
-                            />
-                        </div>
-                    ))}
-
-<button
-                style={{
-                    alignContent: "center",
-                    justifyContent: "center",
-                    margin: "20px auto",
-                    display: "block"
-                }}
-                className="btn-white"
-                onClick={async () => {
-                    console.log(user);
-                    try {
-                        const response = await fetch("http://localhost:4000/submitAnswers", {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({ profile, answers: userAnswers }), // Include user profile along with answers
-                        });
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        console.log('Answers submitted successfully!');
-                        // Clear user answers or perform any other action upon successful submission
-                    } catch (error) {
-                        console.error('Fetch error:', error);
-                    }
-                }}
+          {questions.map((question, index) => (
+            <div
+              key={index}
+              className="card2"
+              style={{
+                width: '1000px',
+                height: 'max-content',
+                margin: '1rem',
+                padding: '1rem',
+                display: 'flex',
+                flexDirection: 'column',
+                background: 'white',
+              }}
             >
-                Submit
-            </button>
+              <h1 style={{ color: 'black', fontWeight: 'bold' }}>Question. {question}</h1>
+              <br />
+              <textarea
+                value={userAnswers[index]}
+                onChange={(e) => {
+                  const updatedAnswers = [...userAnswers];
+                  updatedAnswers[index] = e.target.value;
+                  setUserAnswers(updatedAnswers);
+                }}
+                name={`answer-${index}`}
+                id={`answer-${index}`}
+                cols="100"
+                rows="5"
+                style={{
+                  borderColor: 'black',
+                  borderWidth: '2px',
+                }}
+              />
+            </div>
+          ))}
+
+                    <button
+                        style={{
+                            alignContent: "center",
+                            justifyContent: "center",
+                            margin: "30px auto",
+                            display: "block"
+                        }}
+                        className="btn-white"
+                        onClick={() => {
+                            setTimerActive(false); // Stop the timer manually if the quiz is submitted
+                            submitQuiz();
+                        }}
+                    >
+                        Submit
+                    </button>
                 </div>
             )}
         </div>

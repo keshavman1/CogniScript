@@ -26,6 +26,7 @@ import EditCourse from "./components/core/Dashboard/EditCourse";
 import Catalog from "./pages/Catalog";
 import CourseDetails from "./pages/CourseDetails";
 import Quizes from "./components/core/Dashboard/Quizes";
+import ThankYou from "./components/core/Dashboard/Thankyou";
 
 function App() {
 
@@ -107,12 +108,16 @@ function App() {
       <Route path="dashboard/my-profile" element={<MyProfile />} />
       <Route path="dashboard/Settings" element={<Settings />} />
       <Route path="dashboard/quizes" element={<Quizes />} />
+      <Route path="dashboard/Thankyou" element={<ThankYou />} />
+
       
       {
         user?.accountType === ACCOUNT_TYPE.STUDENT && (
           <>
           <Route path="dashboard/cart" element={<Cart />} />
           <Route path="dashboard/enrolled-courses" element={<EnrolledCourses />} />
+      <Route path="dashboard/Thankyou" element={<ThankYou />} />
+
           
           </>
         )
