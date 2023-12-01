@@ -15,7 +15,6 @@ function Quizes() {
   const [time, setTime] = useState(60);
   const [timerActive, setTimerActive] = useState(false);
   const [quizSubmitted, setQuizSubmitted] = useState(false);
-  const [openedQuizzes, setOpenedQuizzes] = useState([]);
 
   useEffect(() => {
     const fetchQuizzes = async () => {
@@ -82,12 +81,12 @@ function Quizes() {
       setShowThankYou(true);
       setQuizSubmitted(true);
 
-      
+      // Display a toast when the quiz is submitted
       toast.success('Quiz Submitted');
 
     } catch (error) {
       console.error('Fetch error:', error);
-      
+      // Display an error toast if submission fails
       toast.success('Quiz Submitted');
     }
   };
@@ -135,11 +134,11 @@ function Quizes() {
           >
             <h1 style={{ color: 'black' }}>{quiz.uid}</h1>
             <p>Instructor: {quiz.teacher_id}</p>
-            {(selectedQuiz || quizSubmitted || openedQuizzes.includes(quiz.uid)) && (
+            {(selectedQuiz || quizSubmitted) && (
               <button
                 className={`btn-red`}
                 onClick={async () => {
-                  if (!showThankYou && !quizSubmitted && !openedQuizzes.includes(quiz.uid)) {
+                  if (!showThankYou && !quizSubmitted) {
                     try {
                       const response = await fetch(`${baseURL}/quizzes/${quiz.uid}`);
                       if (!response.ok) {
@@ -151,14 +150,13 @@ function Quizes() {
                       setUserAnswers(Array(quizData.questions.length).fill(''));
                       setTime(60);
                       setTimerActive(true);
-                      setOpenedQuizzes((prevQuizzes) => [...prevQuizzes, quiz.uid]);
                       console.log('Quiz data:', quizData);
                     } catch (error) {
                       console.error('Fetch error:', error);
                     }
                   }
                 }}
-                disabled={!selectedQuiz || quizSubmitted || openedQuizzes.includes(quiz.uid)} 
+                disabled={!selectedQuiz || quizSubmitted} 
               >
                 {'Open Quiz'}
               </button>
@@ -177,7 +175,6 @@ function Quizes() {
             }}
             className="btn-white"
             onClick={resetQuizState}
-            disabled={!selectedQuiz || quizSubmitted}
           >
             Close Quiz
           </button>
