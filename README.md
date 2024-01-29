@@ -1,5 +1,5 @@
 # CogniScript
-
+- #LIVE LINK->https://jocular-melba-2e27c1.netlify.app/
 # Introduction
 CogniScript is an innovative online educational platform designed to revolutionize the learning experience. This application allows for course hosting, buying, and selling, making it an ideal space for both students and educators. One of its standout features is the AI-enhanced quiz system, utilizing OpenAI's string matching technology for efficient and accurate assessments.
 
@@ -22,4 +22,4 @@ CogniScript is an innovative online educational platform designed to revolutioni
 - **Create a copy of the .env.sample file and name it .env:** `cp .env.sample .env`
 - **Start the project on your local host:** `npm start`
 
-- #LIVE LINK->https://jocular-melba-2e27c1.netlify.app/
+
